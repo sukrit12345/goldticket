@@ -1,3 +1,8 @@
+const BASE_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://your-api-url.com'  // URL สำหรับ Production (เซิร์ฟเวอร์จริง)
+    : 'http://localhost:3001';     // URL สำหรับ Development (localhost)
+
+
 // ======================
 // ตัวแปรระดับโลก (Global Variables)
 // ======================
@@ -173,7 +178,7 @@ async function loadTreasures() {
         clearTreasureMarkers(); // ลบ Marker เก่าทั้งหมด
         
         // ดึงข้อมูลสมบัติจาก API
-        const response = await fetch('http://localhost:3001/api/treasures');
+        const response = await fetch(`http://${BASE_URL}/api/treasures`);
         treasures = await response.json();
         
         // จัดกลุ่มสมบัติที่ตำแหน่งเดียวกัน
@@ -482,7 +487,7 @@ function validateTreasureForm(formData) {
  */
 async function saveTreasuresToServer(formData) {
     for (let i = 0; i < formData.boxCount; i++) {
-        const response = await fetch('http://localhost:3001/api/treasures', {
+        const response = await fetch(`http://${BASE_URL}/api/treasures`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -543,7 +548,7 @@ async function submitProof() {
  * อัปเดตสถานะสมบัติเป็นถูกเคลมแล้ว
  */
 async function updateTreasureStatus() {
-    const response = await fetch(`http://localhost:3001/api/treasures/${selectedTreasure._id}`, {
+    const response = await fetch(`http://${BASE_URL}/api/treasures/${selectedTreasure._id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ claimed: true })
