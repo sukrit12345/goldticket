@@ -1,0 +1,312 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background-color: #8B4513;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    margin-bottom: 30px;
+    border-radius: 5px;
+}
+
+h1 {
+    margin: 0;
+}
+
+.role-selector {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.role-btn {
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #C19A6B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.role-btn.active {
+    background-color: #A96300;
+}
+
+.role-btn:hover {
+    background-color: #A96300;
+}
+
+.map-container {
+    background-color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* อยู่ล่างสุด */
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    z-index: -1; /* อยู่ล่างสุด */
+}
+.modal {
+    display: none;
+    position: fixed;
+    overflow-y: auto; /* ถ้ามีข้อมูลยาวเกินขนาดให้สามารถเลื่อนขึ้นลงได้ */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-height: 100%; /* ตั้งความสูงสูงสุดให้ไม่เกิน 80% ของหน้าจอ */
+    width: 80%;
+    overflow-y: auto; /* ถ้ามีข้อมูลยาวเกินขนาดให้สามารถเลื่อนขึ้นลงได้ */
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 16px;
+}
+
+.modal-body p{
+    font-size: 14px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #7f8c8d;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.action-buttons2 {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn2 {
+    padding: 10px;
+    width: 100%; /* ความกว้างเต็มพื้นที่ */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #556B2F;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #B22222;
+    color: white;
+}
+
+.btn-success {
+    background-color: #556B2F;
+    color: white;
+}
+
+.treasure-info {
+    margin-bottom: 15px;
+}
+
+.treasure-info p {
+    margin: 5px 0;
+}
+
+/* ปรับ parent container ให้ใช้ flexbox */
+.image-container {
+    display: flex;
+    justify-content: center; /* จัดกลางในแนวนอน */
+    align-items: center; /* จัดกลางในแนวตั้ง */
+    width: 100%; /* ใช้ความกว้างเต็มที่ */
+    position: relative;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 350px;
+    margin-top: 10px;
+    display: block; /* ทำให้แสดงภาพ */
+}
+
+
+.discount-code {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px dashed #e74c3c;
+}
+
+.instructions {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.instructions p{
+    font-size: 14px;
+}
+
+.treasure-icon {
+    background-color: #f39c12;
+    border: 2px solid #fff;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+}
+
+.current-location-icon {
+    text-align: center;
+    font-size: 20px;
+}
+
+.loading-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.box-number {
+    font-size: 12px;
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+}
+
+
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.info-row label {
+    margin-right: 2px;
+    min-width: 30px; /* ปรับตามความกว้างที่ต้องการ */
+    font-size: 14px;
+}
+.info-row span {
+    font-size: 14px;
+}
+
+.mission-content {
+    flex: 1;
+    word-break: break-word; /* สำหรับข้อความยาว */
+}
+
+/*ส่วนลด*/
+.discount-code {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #e91e63;
+    width: 100%; /* ความกว้างเต็ม container */
+    display: block; /* เพื่อให้ width มีผลใน inline element */
+}
+/*ส่วนลด*/
+
+/*ภารกิจ*/
+#treasure-info p {
+    word-wrap: break-word; /* ทำให้ข้อความยาวเกินไปสามารถตัดบรรทัดใหม่ได้ */
+    overflow-wrap: break-word; /* อีกวิธีในการจัดการข้อความยาว */
+    white-space: normal; /* ป้องกันไม่ให้ข้อความยืดออกไปเกินพื้นที่ */
+}
+/*ภารกิจ*/
+

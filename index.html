@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมล่าสมบัติ</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+    
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>สมมบัติรอคุณอยู่</h1>
+        </header>
+        
+        <div class="instructions" id="placer-instructions">
+            <h4>คำแนะนำสำหรับการวางสมบัติ:</h4>
+            <p>คลิกบนแผนที่เพื่อวางสมบัติเเละกรอกข้อมูลสมบัติ</p>
+            <p>กล่องจะหายไปเมื่อนักล่าสมบัติทำภารกิจเสร็จสมบูรณ์</p>
+        </div>
+        
+        <div class="instructions" id="hunter-instructions" style="display: none;">
+            <h4>คำแนะนำสำหรับนักล่าสมบัติ:</h4>
+            <p>คลิกที่สมบัติเพื่อทำภารกิจให้สำเร็จ</p>
+            <p>ทำภารกิจให้เสร็จแล้วคุณจะได้รับคูปองหรือส่วนลด</p>
+        </div>
+        
+        <div class="role-selector">
+            <button id="placer-btn" class="role-btn active">ผู้วางสมบัติ</button>
+            <button id="hunter-btn" class="role-btn">นักล่าสมบัติ</button>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="loading-message" id="loading-message">กำลังโหลดแผนที่และตำแหน่งของคุณ...</div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับการวางสมบัติ -->
+    <div class="modal" id="place-treasure-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">วางสมบัติ</h3>
+                <button class="close-btn" id="close-place-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="placement-date">วันที่วาง:</label>
+                    <input type="date" id="placement-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">ชื่อร้าน:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="ig">ไอจี:</label>
+                    <input type="text" id="ig" >
+                </div>
+                <div class="form-group">
+                    <label for="face">เฟส:</label>
+                    <input type="text" id="face" >
+                </div>
+                <div class="form-group">
+                    <label for="mission">ภารกิจ:</label>
+                    <textarea id="mission" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="discount">ส่วนลด (%):</label>
+                    <input type="number" id="discount" min="1" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="total-boxes">จำนวนกล่อง:</label>
+                    <input type="number" id="total-boxes" min="1" value="1" required>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="cancel-place">ยกเลิก</button>
+                    <button class="btn btn-primary" id="save-treasure">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับดูรายละเอียดสมบัติ -->
+    <div class="modal" id="view-treasure-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">พบสมบัติ!</h3>
+                <button class="close-btn" id="close-view-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="treasure-info" id="treasure-info">
+                    <!-- เติมโดย JavaScript -->
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="cancel-view">ยกเลิก</button>
+                    <button class="btn btn-primary" id="next-step">ถัดไป</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับการส่งหลักฐาน -->
+    <div class="modal" id="submit-proof-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">ส่งหลักฐานภารกิจ</h3>
+                <button class="close-btn" id="close-proof-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="proof-image">อัปโหลดภาพหลักฐาน:</label>
+                    <input type="file" id="proof-image" accept="image/*" required>
+                    <div class="image-container">
+                        <img id="proof-preview" class="preview-image">
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="cancel-proof">กลับ</button>
+                    <button class="btn btn-success" id="submit-proof">ส่ง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับแสดงหลักฐาน -->
+    <div class="modal" id="discount-code-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">เเคปภาพหน้านี้เเล้วส่งให้ทางร้าน</h3>
+                <button class="close-btn" id="close-code-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+
+                <div class="shop-info">
+
+                    <div class="info-row">
+                        <span id="discount-code-display" class="discount-code"></span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <label>ชื่อร้าน:</label>
+                        <span id="shop-name-display"></span>
+                    </div>       
+
+                    <div class="info-row">
+                        <label for="mission-display">ภารกิจ:</label>
+                        <span id="mission-display" class="mission-content"></span>
+                    </div>
+
+                    <div class="info-row">
+                        <label>ส่วนลด:</label>
+                        <span id="discount-display"></span>
+                    </div>
+                </div>
+                
+                <div class="proof-section">
+                    <label>หลักฐานภารกิจ</label>
+                    <div class="image-container">
+                        <img id="proof-image-display" class="preview-image">
+                    </div>
+                </div>
+                
+                <div class="action-buttons2">
+                    <button class="btn2 btn-primary" id="close-code">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts.js"></script>
+    
+</body>
+</html>
