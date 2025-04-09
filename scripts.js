@@ -1,4 +1,4 @@
-const BASE_URL = 'http://goldticketbackend.up.railway.app';
+const BASE_URL = 'https://goldticketbackend.up.railway.app';
 
 
 // ======================
