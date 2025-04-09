@@ -1,4 +1,4 @@
-const BASE_URL = 'https://goldticketbackend.up.railway.app';
+const BASE_URL = 'https://goldticket.up.railway.app';
 
 
 // ======================
@@ -173,28 +173,28 @@ function handleMapClickForPlacer(event) {
  */
 async function loadTreasures() {
     try {
-        clearTreasureMarkers(); // ลบ Marker เก่าทั้งหมด
-        
-        // ดึงข้อมูลสมบัติจาก API
+        clearTreasureMarkers(); // ลบเครื่องหมายสมบัติบนแผนที่ก่อน
+
         const response = await fetch(`${BASE_URL}/api/treasures`);
         
-        // ตรวจสอบสถานะการตอบกลับ
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        let treasures = await response.json();
         
-        treasures = await response.json();
+        // กรองเฉพาะสมบัติที่มี remainingBoxes > 0
+        treasures = treasures.filter(t => t.remainingBoxes > 0);
         
-        // จัดกลุ่มสมบัติที่ตำแหน่งเดียวกัน
-        const locationGroups = groupTreasuresByLocation(treasures);
-        
-        // สร้าง Marker บนแผนที่
-        createTreasureMarkers(locationGroups);
+        const locationGroups = groupTreasuresByLocation(treasures); // กลุ่มข้อมูลสมบัติที่ตำแหน่งเดียวกัน
+        createTreasureMarkers(locationGroups); // สร้างเครื่องหมายสมบัติบนแผนที่
     } catch (error) {
         console.error("Error loading treasures:", error);
         alert("เกิดข้อผิดพลาดในการโหลดข้อมูลสมบัติ");
     }
 }
+
+
 
 
 
@@ -227,24 +227,25 @@ function groupTreasuresByLocation(treasures) {
 }
 
 /**
- * 6.3 สร้างเครื่องหมายสมบัติบนแผนที่
+ * สร้างเครื่องหมายสมบัติบนแผนที่
  * @param {Object} locationGroups - กลุ่มสมบัติที่ตำแหน่งเดียวกัน
  */
 function createTreasureMarkers(locationGroups) {
     Object.values(locationGroups).forEach(treasureGroup => {
-        if (treasureGroup.length === 0) return;
+        // ตรวจสอบว่า remainingBoxes > 0
+        const remainingBoxes = treasureGroup.reduce((sum, t) => sum + (t.remainingBoxes || 0), 0);
+        if (remainingBoxes <= 0) return;
         
         const position = treasureGroup[0];
         
-        // สร้าง Marker ด้วยไอคอนแบบ stacked
+        // สร้าง Marker
         const marker = L.marker([position.lat, position.lng], {
-            icon: createStackedIcon(treasureGroup.length)
+            icon: createStackedIcon(remainingBoxes)
         }).addTo(map);
         
-        // เก็บข้อมูลสมบัติทั้งหมดที่ตำแหน่งนี้
+        // เก็บข้อมูลทั้งหมดที่ตำแหน่งนี้
         marker.treasuresAtLocation = treasureGroup;
         
-        // ตั้งค่าการคลิกที่ Marker (สำหรับโหมด hunter)
         marker.on('click', () => {
             if (currentRole === 'hunter') {
                 handleTreasureMarkerClick(marker, treasureGroup);
@@ -271,7 +272,7 @@ function handleTreasureMarkerClick(marker, treasureGroup) {
 }
 
 /**
- * 7. ฟังก์ชันแสดงข้อมูลสมบัติ
+ * แสดงข้อมูลสมบัติ
  * @param {Object} treasure - ข้อมูลสมบัติที่จะแสดง
  */
 function displayTreasureInfo(treasure) {
@@ -282,22 +283,14 @@ function displayTreasureInfo(treasure) {
         <p><strong>ชื่อร้าน:</strong> ${treasure.name || 'ไม่ระบุ'}</p>
     `;
     
-    // เพิ่มข้อมูลเพิ่มเติมถ้ามี
     if (treasure.ig) infoHTML += `<p><strong>ไอจีร้าน:</strong> ${treasure.ig}</p>`;
     if (treasure.face) infoHTML += `<p><strong>เฟสร้าน:</strong> ${treasure.face}</p>`;
     
     infoHTML += `
         <p><strong>ภารกิจ:</strong> ${treasure.mission || 'ไม่ระบุ'}</p>
         <p><strong>ส่วนลด:</strong> ${treasure.discount || 'ไม่ระบุ'}%</p>
+        <p><strong>จำนวนกล่องที่เหลือ:</strong> ${treasure.remainingBoxes || 0}/${treasure.totalBoxes || 1}</p>
     `;
-    
-    // แสดงจำนวนกล่องสมบัติที่เหลือถ้ามีมากกว่า 1
-    if (selectedMarker?.treasuresAtLocation) {
-        const boxesAtLocation = selectedMarker.treasuresAtLocation.filter(t => !t.claimed).length;
-        if (boxesAtLocation > 1) {
-            infoHTML += `<p><strong>จำนวนกล่องสมบัติที่เหลืออยู่:</strong> ${boxesAtLocation}</p>`;
-        }
-    }
     
     document.getElementById('treasure-info').innerHTML = infoHTML;
 }
@@ -492,25 +485,26 @@ function validateTreasureForm(formData) {
  * @param {Object} formData - ข้อมูลสมบัติที่จะบันทึก
  */
 async function saveTreasuresToServer(formData) {
-    for (let i = 0; i < formData.boxCount; i++) {
-        const response = await fetch(`${BASE_URL}/api/treasures`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                lat: formData.lat,
-                lng: formData.lng,
-                placementDate: formData.placementDate,
-                name: formData.name,
-                ig: formData.ig,
-                face: formData.face,
-                mission: formData.mission,
-                discount: formData.discount,
-                claimed: false
-            })
-        });
-        
-        if (!response.ok) throw new Error('Failed to save treasure');
-    }
+    const treasureData = {
+        lat: formData.lat,
+        lng: formData.lng,
+        placementDate: formData.placementDate,
+        name: formData.name,
+        ig: formData.ig,
+        face: formData.face,
+        mission: formData.mission,
+        discount: formData.discount,
+        totalBoxes: formData.boxCount || 1,
+        remainingBoxes: formData.boxCount || 1 // ตั้งค่าเริ่มต้นเท่ากับ totalBoxes
+    };
+
+    const response = await fetch(`${BASE_URL}/api/treasures`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(treasureData)
+    });
+
+    if (!response.ok) throw new Error('Failed to save treasure');
 }
 
 /**
@@ -551,16 +545,46 @@ async function submitProof() {
 }
 
 /**
- * อัปเดตสถานะสมบัติเป็นถูกเคลมแล้ว
+ * อัปเดตสถานะสมบัติเมื่อถูกเคลม
  */
 async function updateTreasureStatus() {
-    const response = await fetch(`${BASE_URL}/api/treasures/${selectedTreasure._id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claimed: true })
-    });
-    
-    if (!response.ok) throw new Error('Failed to update treasure status');
+    try {
+        const response = await fetch(`${BASE_URL}/api/treasures/${selectedTreasure._id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                $inc: { remainingBoxes: -1 }
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update treasure status');
+        }
+        
+        // อัปเดตข้อมูลในหน้าเว็บ
+        selectedTreasure.remainingBoxes -= 1;
+        
+        // อัปเดตข้อมูลในอาร์เรย์ treasures
+        const treasureIndex = treasures.findIndex(t => t._id === selectedTreasure._id);
+        if (treasureIndex !== -1) {
+            treasures[treasureIndex].remainingBoxes -= 1;
+        }
+        
+        // ถ้าไม่มีกล่องเหลือแล้ว
+        if (selectedTreasure.remainingBoxes <= 0) {
+            // ลบ marker ออกจากแผนที่
+            map.removeLayer(selectedMarker);
+            
+            // ลบออกจากอาร์เรย์ markers
+            treasureMarkers = treasureMarkers.filter(m => m !== selectedMarker);
+            
+            // ลบออกจากอาร์เรย์ treasures
+            treasures = treasures.filter(t => t._id !== selectedTreasure._id);
+        }
+    } catch (error) {
+        console.error("Error updating treasure:", error);
+        throw error;
+    }
 }
 
 /**
@@ -623,7 +647,7 @@ function displayDiscountCode() {
         }).catch(err => {
             console.error("เกิดข้อผิดพลาดในการแคปหน้าจอ:", err);
         });
-    }, 1000); // รอ modal แสดงผล 1 วิ ก่อน capture
+    }, 100); // รอ modal แสดงผล 0.1 วิ ก่อน capture
     
 }
 
