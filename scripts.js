@@ -480,11 +480,28 @@ function validateTreasureForm(formData) {
     return formData.name && formData.mission && formData.discount && formData.placementDate;
 }
 
+
+let lastSubmitTime = 0; // ตัวแปรเก็บเวลาสุดท้ายที่ส่งข้อมูล
+
 /**
- * บันทึกสมบัติลงเซิร์ฟเวอร์
+ * บันทึกสมบัติลงเซิร์ฟเวอร์ พร้อมป้องกันสแปม
  * @param {Object} formData - ข้อมูลสมบัติที่จะบันทึก
  */
 async function saveTreasuresToServer(formData) {
+    // การป้องกันการทำซ้ำคำขอในระยะเวลา 1 วินาที
+    const currentTime = Date.now();
+    if (currentTime - lastSubmitTime < 1000) {
+        return; // หยุดการส่งคำขอหากส่งภายในเวลาไม่ถึง 1 วินาที
+    }
+    
+    lastSubmitTime = currentTime; // อัปเดตเวลาล่าสุด
+
+    // การตรวจสอบข้อมูลพื้นฐาน
+    if (!formData.lat || !formData.lng || !formData.placementDate || !formData.name || !formData.mission) {
+        return; // หยุดหากข้อมูลไม่ครบ
+    }
+
+    // เตรียมข้อมูลสมบัติที่จะส่ง
     const treasureData = {
         lat: formData.lat,
         lng: formData.lng,
@@ -498,14 +515,40 @@ async function saveTreasuresToServer(formData) {
         remainingBoxes: formData.boxCount || 1 // ตั้งค่าเริ่มต้นเท่ากับ totalBoxes
     };
 
-    const response = await fetch(`${BASE_URL}/api/treasures`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(treasureData)
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/treasures`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(treasureData)
+        });
 
-    if (!response.ok) throw new Error('Failed to save treasure');
+        if (!response.ok) throw new Error('Failed to save treasure');
+
+        // หากบันทึกสำเร็จ, ปิดฟอร์มอัตโนมัติ
+        closePlaceTreasureModal(); // ฟังก์ชันที่ใช้ในการปิด Modal หรือฟอร์ม
+
+    } catch (error) {
+        console.error("Error saving treasure:", error);
+        // คุณสามารถใส่การแสดงข้อความผิดพลาดที่นี่ (เช่น console.log) แทนการใช้ alert
+    }
 }
+
+/**
+ * ปิด Modal หรือฟอร์มที่เปิดอยู่
+ */
+function closePlaceTreasureModal() {
+    const modal = document.getElementById('place-treasure-modal');
+    if (modal) {
+        modal.style.display = 'none'; // ซ่อน Modal หรือฟอร์ม
+    }
+    
+    // รีเซ็ตฟอร์ม (หากต้องการให้ฟอร์มกลับไปสู่ค่าเริ่มต้น)
+    const form = modal.querySelector('form');
+    if (form) {
+        form.reset();
+    }
+}
+
 
 /**
  * รีเซ็ตฟอร์มวางสมบัติ
