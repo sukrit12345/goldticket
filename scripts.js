@@ -1,5 +1,5 @@
 const BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://your-api-url.com'  // URL สำหรับ Production (เซิร์ฟเวอร์จริง)
+    ? 'goldticketbackend.up.railway.app'  // URL สำหรับ Production (เซิร์ฟเวอร์จริง)
     : 'http://localhost:3001';     // URL สำหรับ Development (localhost)
 
 
