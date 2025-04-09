@@ -1,7 +1,4 @@
-const BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'goldticketbackend.up.railway.app'  // URL สำหรับ Production (เซิร์ฟเวอร์จริง)
-    : 'http://localhost:3001';     // URL สำหรับ Development (localhost)
-
+const BASE_URL = 'goldticketbackend.up.railway.app';  // URL สำหรับ Production (เซิร์ฟเวอร์จริง)
 
 // ======================
 // ตัวแปรระดับโลก (Global Variables)
