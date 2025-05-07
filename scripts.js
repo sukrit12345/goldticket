@@ -430,18 +430,23 @@ function showModal(modalId) {
  * บันทึกสมบัติใหม่
  */
 async function saveTreasure() {
+    const saveButton = document.getElementById('save-treasure');
+    saveButton.disabled = true; // ปิดปุ่มชั่วคราว
+
     if (!selectedPosition) {
         alert('กรุณาเลือกตำแหน่งบนแผนที่ก่อน');
+        saveButton.disabled = false;
         return;
     }
-    
+
     const formData = getTreasureFormData();
-    
+
     if (!validateTreasureForm(formData)) {
         alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+        saveButton.disabled = false;
         return;
     }
-    
+
     try {
         await saveTreasuresToServer(formData);
         await loadTreasures();
@@ -450,8 +455,11 @@ async function saveTreasure() {
     } catch (error) {
         console.error("Error saving treasure:", error);
         alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+        saveButton.disabled = false; // เปิดปุ่มอีกครั้ง ไม่ว่าจะสำเร็จหรือผิดพลาด
     }
 }
+
 
 /**
  * ดึงข้อมูลจากฟอร์มวางสมบัติ
@@ -566,16 +574,21 @@ function resetTreasureForm() {
  * ส่งหลักฐานการพบสมบัติ
  */
 async function submitProof() {
+    const submitButton = document.getElementById('submit-proof');
+    submitButton.disabled = true; // ปิดปุ่มชั่วคราว
+
     if (!selectedTreasure) {
         alert('เกิดข้อผิดพลาด: ไม่พบสมบัติที่เลือก');
+        submitButton.disabled = false; // เปิดปุ่มอีกครั้ง
         return;
     }
-    
+
     if (!document.getElementById('proof-image').files?.[0]) {
         alert('กรุณาอัปโหลดรูปภาพหลักฐาน');
+        submitButton.disabled = false; // เปิดปุ่มอีกครั้ง
         return;
     }
-    
+
     try {
         await updateTreasureStatus();
         await loadTreasures();
@@ -584,8 +597,11 @@ async function submitProof() {
     } catch (error) {
         console.error("Error submitting proof:", error);
         alert("เกิดข้อผิดพลาดในการส่งหลักฐาน");
+    } finally {
+        submitButton.disabled = false; // เปิดปุ่มอีกครั้งไม่ว่าจะสำเร็จหรือผิดพลาด
     }
 }
+
 
 /**
  * อัปเดตสถานะสมบัติเมื่อถูกเคลม
@@ -690,7 +706,7 @@ function displayDiscountCode() {
         }).catch(err => {
             console.error("เกิดข้อผิดพลาดในการแคปหน้าจอ:", err);
         });
-    }, 100); // รอ modal แสดงผล 0.1 วิ ก่อน capture
+    }, 1000); // รอ modal แสดงผล 1 วิ ก่อน capture
     
 }
 
